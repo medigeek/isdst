@@ -8,5 +8,4 @@ Check if DST (Daylight saving time) changed and display a popup
 ### Usage
 
     gcc isdstd.c -o isdstd
-    touch .isdst
     ./isdstd

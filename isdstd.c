@@ -30,6 +30,9 @@
 
 #include <signal.h>
 
+//Timestamp file -- .isdst
+#define TSFILE ".isdst"
+
 // Define the function to be called when ctrl-c (SIGINT) signal is sent to process
 void terminate(int signum)
 {
@@ -38,7 +41,7 @@ void terminate(int signum)
     
     printf("Caught signal %d - Saving timestamp to file\n", signum);
     ternow = time(NULL);
-    fp = fopen(".isdst", "w");
+    fp = fopen(TSFILE, "w");
     fprintf(fp, "%ld", ternow);
     fflush(fp);
     fclose(fp);
@@ -56,8 +59,12 @@ int compare_fromfile(time_t now) {
     tm_now = localtime(&now);
     isdst = tm_now->tm_isdst;
 
+    //Create the file
+    FILE *fh = fopen(TSFILE, "w");
+    fclose(fh);
+
     //w+ doesn't work with fscanf
-    fp = fopen("isdst", "r+");
+    fp = fopen(TSFILE, "r+");
     fscanf(fp, "%ld", &lastchk);
     rewind(fp);
     tlast = localtime(&lastchk);
