@@ -59,20 +59,16 @@ int compare_fromfile(time_t now) {
     tm_now = localtime(&now);
     isdst = tm_now->tm_isdst;
 
-    //Create the file
-    FILE *fh = fopen(TSFILE, "r");
-    if (fh == NULL) {
-        printf("File %s doesn't exist, creating file", TSFILE);
-        fclose(fh);
-        FILE *fh = fopen(TSFILE, "w");
-        fclose(fh);
+    if (access(TSFILE, F_OK) != -1) {
+        fp = fopen(TSFILE, "r+");
+        fscanf(fp, "%ld", &lastchk);
+        rewind(fp);
+    } else {
+        // file does not exist
+        fp = fopen(TSFILE, "w+");
+        lastchk = 0;
     }
-    fclose(fh);
 
-    //w+ doesn't work with fscanf
-    fp = fopen(TSFILE, "r+");
-    fscanf(fp, "%ld", &lastchk);
-    rewind(fp);
     tlast = localtime(&lastchk);
     wasdst = tlast->tm_isdst;
 
