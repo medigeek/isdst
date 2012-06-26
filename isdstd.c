@@ -60,7 +60,13 @@ int compare_fromfile(time_t now) {
     isdst = tm_now->tm_isdst;
 
     //Create the file
-    FILE *fh = fopen(TSFILE, "w");
+    FILE *fh = fopen(TSFILE, "r");
+    if (fh == NULL) {
+        printf("File %s doesn't exist, creating file", TSFILE);
+        fclose(fh);
+        FILE *fh = fopen(TSFILE, "w");
+        fclose(fh);
+    }
     fclose(fh);
 
     //w+ doesn't work with fscanf
