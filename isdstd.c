@@ -48,6 +48,17 @@ void terminate(int signum)
     exit(signum);
 }
 
+int exists(const char *fname)
+{
+    FILE *file;
+    if ((file = fopen(fname, "r")))
+    {
+        fclose(file);
+        return 1;
+    }
+    return 0;
+}
+
 int compare_fromfile(time_t now) {
     FILE *fp;
     long lastchk;
@@ -59,7 +70,7 @@ int compare_fromfile(time_t now) {
     tm_now = localtime(&now);
     isdst = tm_now->tm_isdst;
 
-    if (access(TSFILE, F_OK) != -1) {
+    if (exists(TSFILE) == 1) {
         fp = fopen(TSFILE, "r+");
         fscanf(fp, "%ld", &lastchk);
         rewind(fp);
