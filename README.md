@@ -1,11 +1,17 @@
 isdst
 =====
 
-Check if DST (Daylight saving time) changed and display a popup
+Check if DST (Daylight saving time) changed and display a popup window
+
+Currently uses zenity as notification backend.
 
 (still experimental)
 
 ### Usage
 
-    gcc isdstd.c -o isdstd
+    make
     ./isdstd
+
+### Notes
+
+    The default file, where the latest check is saved, is ".isdst".

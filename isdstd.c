@@ -18,7 +18,7 @@
 
 /*
  Compile command: gcc isdstd.c -Wall -o isdstd
- Before running: touch isdst
+ Before running: touch .isdst
  Run: ./test
 */
 
@@ -33,9 +33,13 @@
 //Timestamp file -- .isdst
 #define TSFILE ".isdst"
 
+//How to notify the user (zenity or otherwise)
+#define DSTNOTIFY 0
+#define ZENITY 0
+#define SOMETHINGELSE 1
+
 // Define the function to be called when ctrl-c (SIGINT) signal is sent to process
-void terminate(int signum)
-{
+void terminate(int signum) {
     FILE *fp;
     time_t ternow;
     
@@ -48,8 +52,7 @@ void terminate(int signum)
     exit(signum);
 }
 
-int exists(const char *fname)
-{
+int exists(const char *fname) {
     FILE *file;
     if ((file = fopen(fname, "r")))
     {
@@ -116,8 +119,31 @@ int compare_live(time_t now, time_t now2) {
     else { return 1; }
 }
 
-int main(void)
-{
+int dstnotify(time_t now) {
+    struct tm *tm_now;
+    int isdst;
+
+    tm_now = localtime(&now);
+    isdst = tm_now->tm_isdst;
+    if (isdst == 1) {
+        printf("dstnotify(): Daylight savings time is in effect.\n");
+        #if DSTNOTIFY == ZENITY
+        system("zenity --warning --text 'Daylight savings time is in effect.'");
+        #elif DSTNOTIFY == SOMETHINGELSE
+        //nothing
+        #endif
+    } else {
+        printf("dstnotify(): Daylight savings time is not in effect anymore.\n");
+        #if DSTNOTIFY == ZENITY
+        system("zenity --warning --text 'Daylight savings time is not in effect anymore.'");
+        #elif DSTNOTIFY == SOMETHINGELSE
+        //nothing
+        #endif
+    }
+    return 0;
+}
+
+int main(void) {
     // Register signal and signal handler
     signal(SIGINT, terminate);
     signal(SIGTERM, terminate);
@@ -129,9 +155,13 @@ int main(void)
     int cmplive;
 
     now = time(NULL);
+    
     // Compare from file (last check)
     cmpfile = compare_fromfile(now);
-    if (cmpfile == 1) { printf("ALARM! DST changed since last check!\n"); }
+    if (cmpfile == 1) {
+        dstnotify(now);
+        printf("ALARM! DST changed since last check!\n");
+    }
     
     while (1)
     {
@@ -139,15 +169,17 @@ int main(void)
         cmplive = compare_live(now, now2);
         if (cmplive == 1)
         {
+            dstnotify(now);
             printf("LIVE ALARM! DST changed since last live check!\n");
         }
         else
         {
+            //dstnotify(now);
             printf("No changes detected in DST. Sleeping...\n");
         }
         // Prepare for next cycle
         now = now2;
-        sleep(2);
+        sleep(10);
     }
     return 0;
 }
