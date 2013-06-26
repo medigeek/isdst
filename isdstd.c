@@ -17,9 +17,8 @@
  */
 
 /*
- Compile command: gcc isdstd.c -Wall -o isdstd
- Before running: touch .isdst
- Run: ./test
+ Compile command: gcc -Wall isdstd.c -o isdstd
+  Run: ./isdst
 */
 
 #include <time.h>
