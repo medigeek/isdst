@@ -32,10 +32,27 @@
 //Timestamp file -- .isdst
 #define TSFILE ".isdst"
 
-//How to notify the user (zenity or otherwise)
+//How to notify the user (libnotify, zenity or otherwise)
 #define DSTNOTIFY 0
-#define ZENITY 0
-#define SOMETHINGELSE 1
+#define LIBNOTIFY 0
+#define ZENITY 1
+
+#if DSTNOTIFY == LIBNOTIFY
+#include <libnotify/notify.h>
+#include <libnotify/notification.h>
+#endif
+
+void libnotify_notify(char *title, char *description) {
+    #if DSTNOTIFY == LIBNOTIFY
+    notify_init("isdst");
+    NotifyNotification * isdstnotif = notify_notification_new(title, description, "time");
+    notify_notification_set_timeout(isdstnotif, 60000);
+    notify_notification_set_category(isdstnotif, "system");
+    notify_notification_show(isdstnotif, NULL);
+    notify_notification_set_urgency(isdstnotif, NOTIFY_URGENCY_CRITICAL);
+    #endif
+}
+
 
 // Define the function to be called when ctrl-c (SIGINT) signal is sent to process
 void terminate(int signum) {
@@ -128,15 +145,15 @@ int dstnotify(time_t now) {
         printf("dstnotify(): Daylight savings time is in effect.\n");
         #if DSTNOTIFY == ZENITY
         system("zenity --warning --text 'Daylight savings time is in effect.'");
-        #elif DSTNOTIFY == SOMETHINGELSE
-        //nothing
+        #elif DSTNOTIFY == LIBNOTIFY
+        libnotify_notify("DST in effect!", "Daylight savings time is in effect.");
         #endif
     } else {
         printf("dstnotify(): Daylight savings time is not in effect anymore.\n");
         #if DSTNOTIFY == ZENITY
         system("zenity --warning --text 'Daylight savings time is not in effect anymore.'");
-        #elif DSTNOTIFY == SOMETHINGELSE
-        //nothing
+        #elif DSTNOTIFY == LIBNOTIFY
+        libnotify_notify("DST not in effect!", "Daylight savings time is not in effect anymore.");
         #endif
     }
     return 0;
@@ -173,7 +190,7 @@ int main(void) {
         }
         else
         {
-            //dstnotify(now);
+            dstnotify(now);
             printf("No changes detected in DST. Sleeping...\n");
         }
         // Prepare for next cycle
