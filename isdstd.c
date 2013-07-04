@@ -1,6 +1,6 @@
 /*
     Daylight savings time in/not in effect notification
-    Copyright (C) 2012 Savvas Radevic <vicedar@gmail.com>
+    Copyright (C) 2013 Savvas Radevic <vicedar@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,9 @@
 #define TSFILE ".isdst"
 
 //How to notify the user (libnotify, zenity or otherwise)
+#ifndef DSTNOTIFY
 #define DSTNOTIFY 0
+#endif
 #define LIBNOTIFY 0
 #define ZENITY 1
 
